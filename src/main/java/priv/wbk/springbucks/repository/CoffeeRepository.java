@@ -1,6 +1,6 @@
 package priv.wbk.springbucks.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import priv.wbk.springbucks.model.Coffee;
 
 /**
@@ -9,5 +9,5 @@ import priv.wbk.springbucks.model.Coffee;
  * @author wbk
  * @email 3207264942@qq.com
  */
-public interface CoffeeRepository extends CrudRepository<Coffee, Long> {
+public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 }

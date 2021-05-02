@@ -31,13 +31,13 @@ public class BaseEntity implements Serializable {
 
 * Coffee
 
-对应的是T_MENU数据表
+对应的是T_COFFEE数据表
 
 ```java
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-@Table(name = "T_MENU")
+@Table(name = "T_COFFEE")
 @Builder
 @Data
 @NoArgsConstructor
@@ -97,6 +97,85 @@ public class CoffeeOrder extends BaseEntity {
 }
 
 ```
+
+### Repository用法示例
+
+```java
+ public class SpringBucksApplication implements ApplicationRunner {
+
+    @Autowired
+    private CoffeeRepository coffeeRepository;
+
+    @Autowired
+    private CoffeeOrderRepository orderRepository;
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBucksApplication.class, args);
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        initOrders();
+    }
+
+    private void initOrders() {
+        Coffee espresso = Coffee.builder().name("espresso")
+                .price(Money.of(CurrencyUnit.of("CNY"), 20.0))
+                .build();
+        coffeeRepository.save(espresso);
+        log.info("Coffee: {}", espresso);
+
+        Coffee latte = Coffee.builder().name("latte")
+                .price(Money.of(CurrencyUnit.of("CNY"), 30.0))
+                .build();
+        coffeeRepository.save(latte);
+        log.info("Coffee: {}", latte);
+
+        CoffeeOrder order = CoffeeOrder.builder()
+                .customer("Li Lei")
+                .items(Collections.singletonList(espresso))
+                .state(OrderState.INIT)
+                .build();
+        orderRepository.save(order);
+        log.info("Order: {}", order);
+
+        order = CoffeeOrder.builder()
+                .customer("Li Lei")
+                .items(Arrays.asList(espresso, latte))
+                .state(OrderState.INIT)
+                .build();
+        orderRepository.save(order);
+        log.info("Order: {}", order);
+    }
+
+}
+
+```
+
+### Service定义示例
+
+* CoffeeService类
+
+```java
+@Slf4j
+@Service
+public class CoffeeService {
+
+    @Autowired
+    private CoffeeRepository coffeeRepository;
+
+   public Optional<Coffee> findOneCoffee(String name) {
+       ExampleMatcher matcher = ExampleMatcher.matching()
+               .withMatcher("name", exact().ignoreCase());
+       Optional<Coffee> coffee = coffeeRepository.findOne(
+               Example.of(Coffee.builder().name(name).build(), matcher));
+       log.info("Coffee found: {}", coffee);
+       return coffee;
+   }
+}
+
+```
+
 
 ### Guides
 
