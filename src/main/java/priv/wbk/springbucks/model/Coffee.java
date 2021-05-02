@@ -34,6 +34,6 @@ public class Coffee extends BaseEntity {
      */
     @Column
     @Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyMinorAmount",
-            parameters = {@org.hibernate.annotations.Parameter(name = "CurrencyCode", value = "CNY")})
+            parameters = {@org.hibernate.annotations.Parameter(name = "currencyCode", value = "CNY")})
     private Money price;
 }
