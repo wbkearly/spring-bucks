@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import priv.wbk.springbucks.model.Coffee;
 import priv.wbk.springbucks.repository.CoffeeRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
@@ -24,6 +25,10 @@ public class CoffeeService {
 
     @Autowired
     private CoffeeRepository coffeeRepository;
+
+    public List<Coffee> findAllCoffees() {
+        return coffeeRepository.findAll();
+    }
 
    public Optional<Coffee> findOneCoffee(String name) {
        ExampleMatcher matcher = ExampleMatcher.matching()

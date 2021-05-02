@@ -6,4 +6,9 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+redis:
+  host: localhost
+  max-total: 5
+  max-idle: 5
+  test-on-borrow: true
 

@@ -176,6 +176,131 @@ public class CoffeeService {
 
 ```
 
+### MongoDB 使用示例
+
+* SpringBoot配置
+  
+  spring.data.mongodb.uri=mongodb://springbucks:springbucks@localhost:27017/springbucks
+
+* Money转换器
+
+```java
+public class MoneyReadConverter implements Converter<Document, Money> {
+
+    @Override
+    public Money convert(Document source) {
+        Document money = (Document) source.get("money");
+        double amount = Double.parseDouble(money.getString("amount"));
+        String currency = ((Document) money.get("currency")).getString("code");
+        return Money.of(CurrencyUnit.of(currency), amount);
+    }
+}
+```
+
+* 使用示例
+
+```java
+@SpringBootApplication
+@Slf4j
+public class SpringBucksApplication implements ApplicationRunner {
+    
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBucksApplication.class, args);
+    }
+
+    @Bean
+    public MongoCustomConversions mongoCustomConversions() {
+        return new MongoCustomConversions(Collections.singletonList(new MoneyReadConverter()));
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        Coffee espresso = Coffee.builder()
+                .name("espresso")
+                .price(Money.of(CurrencyUnit.of("CNY"), 20.0))
+                .build();
+        Coffee saved = mongoTemplate.save(espresso);
+        log.info("Coffee {}",  saved);
+
+        List<Coffee> list = mongoTemplate.find(
+                query(where("name").is("espresso")), Coffee.class);
+        log.info("Find {} Coffee", list.size());
+        list.forEach(coffee -> log.info("Coffee {}", coffee));
+
+        Thread.sleep(1000);
+        UpdateResult result = mongoTemplate.updateFirst(
+                query(where("name").is("espresso")),
+                new Update().set("price", Money.ofMajor(CurrencyUnit.of("CNY"), 30))
+                        .currentDate("updateTime"), Coffee.class);
+        Coffee updateOne = mongoTemplate.findById(saved.getId(), Coffee.class);
+        log.info("Update Result: {}", updateOne);
+
+        mongoTemplate.remove(updateOne);
+    }
+
+}
+```
+
+### Jedis 相关使用
+
+* 直接使用Jedis
+
+```java
+@SpringBootApplication
+@EnableJpaRepositories
+@EnableTransactionManagement
+@Slf4j
+public class SpringBucksApplication implements ApplicationRunner {
+
+    @Autowired
+    private CoffeeService coffeeService;
+
+    @Autowired
+    private JedisPool jedisPool;
+
+    @Autowired
+    private JedisPoolConfig jedisPoolConfig;
+
+    // 实现自动读取redis相关配置
+    @Bean
+    @ConfigurationProperties("redis")
+    public JedisPoolConfig getJedisPoolConfig() {
+        return new JedisPoolConfig();
+    }
+
+    @Bean(destroyMethod = "close")
+    public JedisPool getJedisPool(@Value("${redis.host}") String host) {
+        return new JedisPool(getJedisPoolConfig(), host);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBucksApplication.class, args);
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        log.info(jedisPoolConfig.toString());
+        try (Jedis jedis = jedisPool.getResource()) {
+            coffeeService.findAllCoffees().forEach(coffee -> {
+                jedis.hset("springbucks-menu",
+                        coffee.getName(),
+                        Long.toString(coffee.getPrice().getAmountMinorLong()));
+            });
+            Map<String, String> menu = jedis.hgetAll("springbucks-menu");
+            log.info("Menu: {}", menu);
+
+            String price = jedis.hget("springbucks-menu", "espresso");
+            log.info("espresso - {}",
+                    Money.of(CurrencyUnit.of("CNY"), Long.parseLong(price)));
+        }
+    }
+
+}
+
+```
 
 ### Guides
 
