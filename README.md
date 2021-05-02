@@ -1,15 +1,81 @@
 # Spring Bucks Project (学习项目-线上咖啡馆)
 
-项目初始化
+定义Coffee和CoffeeOder实体类
 
-### Reference Documentation
+### 实体定义
 
-For further reference, please consider the following sections:
+* Coffee
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.4.5/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.4.5/maven-plugin/reference/html/#build-image)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/docs/2.4.5/reference/htmlsingle/#boot-features-jpa-and-spring-data)
+对应的是T_MENU数据表
+
+```java
+@Entity
+@Table(name = "T_MENU")
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Coffee implements Serializable {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @Column
+    @Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyAmount",
+            parameters = {@org.hibernate.annotations.Parameter(name = "CurrencyCode", value = "CNY")})
+    private Money price;
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    private Date createTime;
+
+    @UpdateTimestamp
+    private Date updateTime;
+}
+
+```
+
+* CoffeeOrder
+
+对应的是T_ORDER数据表
+
+```java
+@Entity
+@Table(name = "T_ORDER")
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CoffeeOrder implements Serializable {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String customer;
+
+    @ManyToMany
+    @JoinTable(name = "T_ORDER_COFFEE")
+    private List<Coffee> items;
+
+    /**
+     * 订单状态
+     */
+    @Column(nullable = false)
+    private Integer state;
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    private Date createTime;
+
+    @UpdateTimestamp
+    private Date updateTime;
+}
+
+```
 
 ### Guides
 
