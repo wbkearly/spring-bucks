@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -29,6 +30,7 @@ import java.util.Map;
 @SpringBootApplication
 @EnableJpaRepositories
 @EnableTransactionManagement
+@EnableCaching(proxyTargetClass = true)
 @Slf4j
 public class SpringBucksApplication implements ApplicationRunner {
 
