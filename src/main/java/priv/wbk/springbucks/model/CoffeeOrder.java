@@ -1,17 +1,7 @@
 package priv.wbk.springbucks.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.joda.money.Money;
-
+import lombok.*;
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,30 +15,23 @@ import java.util.List;
 @Table(name = "T_ORDER")
 @Builder
 @Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class CoffeeOrder implements Serializable {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class CoffeeOrder extends BaseEntity {
 
     private String customer;
 
     @ManyToMany
     @JoinTable(name = "T_ORDER_COFFEE")
+    @OrderBy("id")
     private List<Coffee> items;
 
     /**
      * 订单状态
      */
     @Column(nullable = false)
-    private Integer state;
+    private OrderState state;
 
-    @Column(updatable = false)
-    @CreationTimestamp
-    private Date createTime;
-
-    @UpdateTimestamp
-    private Date updateTime;
 }
