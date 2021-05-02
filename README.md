@@ -302,6 +302,14 @@ public class SpringBucksApplication implements ApplicationRunner {
 
 ```
 
+### Spring 缓存相关
+
+* 注解
+
+`@Cacheable`
+`@CacheEvict`
+`@EnableCaching(proxyTargetClass = true)`
+
 ### Guides
 
 The following guides illustrate how to use some features concretely:
